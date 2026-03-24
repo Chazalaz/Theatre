@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Theatre Stage</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+
+    <body>
+        <!-- This is where the 3D Scene will render -->
+        <canvas id="theatre-canvas"></canvas>
+
+        <!-- Layers panel - left side of the screen -->
+        <div id="layers-panel">
+            <h3>Layers</h3>
+            <ul id="layers-list"></ul>
+        </div>
+
+        <!-- Add Button - bottom centre -->
+        <button id="add-btn">+ Add</button>
+
+
+        <!-- Add panel - slides up when Add is clicked -->
+        <div id="add-panel">
+            <h3>Add To Stage</h3>
+            <div id="add-panel-items"></div>
+        </div>
+
+
+        <!-- three.js via CDN -->
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+                }
+            }
+        </script>
+
+
+        <!-- App entry point -->
+        <script type="module" src="js/main.js"></script>
+    </body>
+</html> 
