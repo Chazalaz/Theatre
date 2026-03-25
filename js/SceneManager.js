@@ -7,7 +7,7 @@ export class SceneManager
     constructor(canvasId)
     {
         this.canvas = document.getElementById(canvasId);
-        this.scene = new THREE.scene();
+        this.scene = new THREE.Scene();
         this._setupRenderer();
         this._setupCamera();
         this._setupLights();
@@ -25,6 +25,7 @@ export class SceneManager
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setClearColor(0x1a1a1a);
         this.renderer.shadowMap.enabled = true;
     }
 
@@ -69,7 +70,7 @@ export class SceneManager
     {
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.updateProjectMatrix();
+            this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
     }

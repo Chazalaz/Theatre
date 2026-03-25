@@ -10,8 +10,9 @@ const assetLibrary = new AssetLibrary();
 const props = [];
 
 const addBtn = document.getElementById('add-btn');
+const closePanel = document.getElementById('close-panel');
 const addPanel = document.getElementById('add-panel');
-const addPanelItems = document.getElementById('add_panel_items');
+const addPanelItems = document.getElementById('add-panel-items');
 
 assetLibrary.getCatalogue().forEach(asset => {
     const btn = document.createElement('button');
@@ -35,6 +36,11 @@ assetLibrary.getCatalogue().forEach(asset => {
 
 addBtn.addEventListener('click', () => {
     addPanel.classList.toggle('open');
+});
+
+
+closePanel.addEventListener('click', () => {
+    addPanel.classList.remove('open');
 });
 
 

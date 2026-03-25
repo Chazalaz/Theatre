@@ -16,7 +16,7 @@ export class Prop
 
     placeAtCentre(stageHeight)
     {
-        this.mesh.position.set(0, stageHeight + this.mesh.geometery.parameters.height / 2, 0);
+        this.mesh.position.set(0, stageHeight + this.mesh.geometry.parameters.height / 2, 0);
     }
 
     select()
