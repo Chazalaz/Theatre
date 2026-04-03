@@ -2,6 +2,7 @@ import { SceneManager } from './SceneManager.js';
 import { Stage } from './Stage.js';
 import { AssetLibrary } from './AssetLibrary.js';
 import { STAGE_CONFIG } from './config.js';
+import { InputManager } from './InputManager.js';
 
 const sceneManager = new SceneManager('theatre-canvas');
 const stage = new Stage(sceneManager);
@@ -14,10 +15,32 @@ const closePanel = document.getElementById('close-panel');
 const addPanel = document.getElementById('add-panel');
 const addPanelItems = document.getElementById('add-panel-items');
 
+let selectedProp = null;
+
+
+const inputManager = new InputManager(sceneManager, props, (clickedProp) => {
+    if(selectedProp) 
+    {
+        selectedProp.deselect();
+        document.querySelectorAll('#layers-list li').forEach(el => el.classList.remove('selected'));
+    }
+    if(clickedProp == null)
+    {
+        selectedProp = null;
+        return;
+    }
+    
+    selectedProp = clickedProp;
+    selectedProp.select();
+    const matchingLi = document.querySelector(`#layers-list li[data-id="${clickedProp.id}"]`);
+    if(matchingLi) matchingLi.classList.add('selected');
+});
+
+
 assetLibrary.getCatalogue().forEach(asset => {
     const btn = document.createElement('button');
     btn.textContent = asset.name;
-    btn.style.padding         = '10px, 20px';
+    btn.style.padding         = '10px 20px';
     btn.style.marginRight     = '10px';
     btn.style.cursor          = 'pointer';
     btn.style.backgroundColor = '#333';
@@ -67,8 +90,20 @@ function updateLayersPanel()
         li.textContent = prop.name;
         li.dataset.id = prop.id;
 
+        li.addEventListener('click', () => {
+            if(selectedProp) 
+            {
+                selectedProp.deselect();
+                document.querySelectorAll('#layers-list li').forEach(el => el.classList.remove('selected'));
+            }
+
+            selectedProp = props.find(p => p.id === prop.id);
+            selectedProp.select();
+            li.classList.add('selected');
+        });
+
         const deleteBtn = document.createElement('button');
-        deleteBtn.textContext           = 'X';
+        deleteBtn.textContent           = 'X';
         deleteBtn.style.backgroundColor = 'transparent';
         deleteBtn.style.color           = '#ff4444';
         deleteBtn.style.border          = 'none';
@@ -77,7 +112,7 @@ function updateLayersPanel()
 
 
         deleteBtn.addEventListener('click', (e) => {
-            e.stopPropogation();
+            e.stopPropagation();
             removeProp(prop.id);
         });
 

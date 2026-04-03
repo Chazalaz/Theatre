@@ -25,7 +25,7 @@ export class SceneManager
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setClearColor(0x1a1a1a);
+        this.renderer.setClearColor(0x444444);
         this.renderer.shadowMap.enabled = true;
     }
 
@@ -45,11 +45,11 @@ export class SceneManager
 
     _setupLights()
     {
-        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        const ambient = new THREE.AmbientLight(0xffffff, 2);
         this.scene.add(ambient);
 
 
-        const spotlight = new THREE.SpotLight(0xffffff, 1.5);
+        const spotlight = new THREE.SpotLight(0xffffff, 3);
         spotlight.position.set(0, 10, 0);
         spotlight.castShadow = true;
         spotlight.target.position.set(0,0,0);

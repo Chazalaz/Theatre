@@ -19,7 +19,7 @@ export class Stage
             STAGE_CONFIG.depth
         );
 
-        const material = new THREE.MeshStandardMaterial({ color: 0x8B4513});
+        const material = new THREE.MeshStandardMaterial({ color: 0x333333});
         this.floor = new THREE.Mesh(geometry, material);
         this.floor.position.y = STAGE_CONFIG.floorHeight;
         this.floor.receiveShadow = true;
@@ -28,7 +28,8 @@ export class Stage
 
     _buildWalls()
     {
-        const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x222222});
+        const sidewallMaterial = new THREE.MeshStandardMaterial({ color: 0x3a3a3a});
+        const backwallMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff});
 
         const backWallGeo = new THREE.BoxGeometry(
             STAGE_CONFIG.width,
@@ -36,7 +37,7 @@ export class Stage
             0.1
         );
 
-        const backWall = new THREE.Mesh(backWallGeo, wallMaterial);
+        const backWall = new THREE.Mesh(backWallGeo, backwallMaterial);
         backWall.position.set(
             0,
             STAGE_CONFIG.floorHeight + STAGE_CONFIG.wallHeight / 2,
@@ -52,7 +53,7 @@ export class Stage
             STAGE_CONFIG.depth
         );
         
-        const leftWall = new THREE.Mesh(sideWallGeo, wallMaterial);
+        const leftWall = new THREE.Mesh(sideWallGeo, sidewallMaterial);
         leftWall.position.set(
             -STAGE_CONFIG.width / 2, 
             STAGE_CONFIG.floorHeight + STAGE_CONFIG.wallHeight / 2,
@@ -62,13 +63,25 @@ export class Stage
         this.sceneManager.add(leftWall);
 
 
-        const rightWall = new THREE.Mesh(sideWallGeo, wallMaterial);
+        const rightWall = new THREE.Mesh(sideWallGeo, sidewallMaterial);
         rightWall.position.set(
             STAGE_CONFIG.width / 2,
             STAGE_CONFIG.floorHeight + STAGE_CONFIG.wallHeight / 2,
             0
         );
 
+        this._addEdges(rightWall);
+        this._addEdges(this.floor);
+        this._addEdges(leftWall);
+        this._addEdges(backWall);
         this.sceneManager.add(rightWall);
+    }
+
+    _addEdges(mesh, color = 0x444444)
+    {
+        const edges = new THREE.EdgesGeometry(mesh.geometry);
+        const edgeMaterial = new THREE.LineBasicMaterial({ color });
+        const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
+        mesh.add(edgeLines);
     }
 }

@@ -14,7 +14,7 @@ export class AssetLibrary
             },
             {
                 name: 'Table',
-                color: 0x8B4513,
+                color: 0x5B4513,
                 geometry: new THREE.BoxGeometry(1.5, 0.5, 0.8),
             },
             {
