@@ -12,7 +12,7 @@ export class InputManager {
         this.activeProp = null;
         this.floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -STAGE_CONFIG.floorHeight);
         this.targetPoint = new THREE.Vector3();
-     
+        this.dragOffset = new THREE.Vector3();
      
         this._setupEventListeners();
     }
@@ -47,6 +47,14 @@ export class InputManager {
                 this.isDragging = true;
                 this.sceneManager.controls.enabled = false;
                 this.onPropSelected(clickedProp);
+
+                // Get the floor plane interstection point at mouse down
+                this.raycaster.ray.intersectPlane(this.floorPlane, this.targetPoint);
+
+                // Calculate drag offset
+                const clickPoint = intersects[0].point;
+                this.dragOffset.x = this.activeProp.mesh.position.x - clickPoint.x;
+                this.dragOffset.z = this.activeProp.mesh.position.z - clickPoint.z;
             }
         } else {
             this.onPropSelected(null);
@@ -58,8 +66,11 @@ export class InputManager {
 
         this._updateMouse(e);
         this.raycaster.setFromCamera(this.mouse, this.sceneManager.camera);
-        this.raycaster.ray.intersectPlane(this.floorPlane, this.targetPoint);
-        this.activeProp.move(this.targetPoint.x, this.targetPoint.z);
+
+        const intersection = this.raycaster.ray.intersectPlane(this.floorPlane, this.targetPoint); 
+        if(!intersection) return;
+    
+        this.activeProp.move(this.targetPoint.x + this.dragOffset.x, this.targetPoint.z + this.dragOffset.z);
     }
 
     _onMouseUp() {

@@ -13,6 +13,7 @@ export class SceneManager
         this._setupLights();
         this._setupControls();
         this._setupResizeHandler();
+        this.onCameraChange = null;
     }
 
 
@@ -75,6 +76,18 @@ export class SceneManager
         });
     }
 
+
+    resetCamera()
+    {
+        this.controls.enableDamping = false;
+
+        this.camera.position.set(0,8,14);
+        this.camera.lookAt(0,0,0);
+        this.controls.target.set(0,0,0);
+
+        this.controls.enableDamping = true;
+    }
+
     add(object)
     {
         this.scene.add(object);
@@ -87,9 +100,14 @@ export class SceneManager
 
     start()
     {
+        const defaultPosition = new THREE.Vector3(0,8,14);
+
         this.renderer.setAnimationLoop(() => {
             this.controls.update();
             this.renderer.render(this.scene, this.camera);
+
+            const isAtDefault = this.camera.position.distanceTo(defaultPosition) < 0.5;
+            if(this.onCameraChange) this.onCameraChange(!isAtDefault);
         });
     }
 }

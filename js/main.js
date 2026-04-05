@@ -3,28 +3,48 @@ import { Stage } from './Stage.js';
 import { AssetLibrary } from './AssetLibrary.js';
 import { STAGE_CONFIG } from './config.js';
 import { InputManager } from './InputManager.js';
+import { LayersPanel } from './LayersPanel.js';
+
+
 
 const sceneManager = new SceneManager('theatre-canvas');
 const stage = new Stage(sceneManager);
 const assetLibrary = new AssetLibrary();
 
 const props = [];
+let selectedProp = null;
 
 const addBtn = document.getElementById('add-btn');
 const closePanel = document.getElementById('close-panel');
 const addPanel = document.getElementById('add-panel');
 const addPanelItems = document.getElementById('add-panel-items');
+const resetViewBtn = document.getElementById('reset-view-btn');
 
-let selectedProp = null;
 
+const layersPanel = new LayersPanel('layers-panel', (prop) => {
+    if(selectedProp) 
+    {
+        selectedProp.deselect();
+    }
+    if(prop === null)
+    {
+        selectedProp = null;
+        return;
+    }
+    
+    selectedProp = prop;
+    selectedProp.select();
+    layersPanel.setSelected(prop);
+}, (prop) => {
+    removeProp(prop.id);
+});
 
 const inputManager = new InputManager(sceneManager, props, (clickedProp) => {
     if(selectedProp) 
     {
         selectedProp.deselect();
-        document.querySelectorAll('#layers-list li').forEach(el => el.classList.remove('selected'));
     }
-    if(clickedProp == null)
+    if(clickedProp === null)
     {
         selectedProp = null;
         return;
@@ -32,8 +52,7 @@ const inputManager = new InputManager(sceneManager, props, (clickedProp) => {
     
     selectedProp = clickedProp;
     selectedProp.select();
-    const matchingLi = document.querySelector(`#layers-list li[data-id="${clickedProp.id}"]`);
-    if(matchingLi) matchingLi.classList.add('selected');
+    layersPanel.setSelected(clickedProp);
 });
 
 
@@ -57,6 +76,15 @@ assetLibrary.getCatalogue().forEach(asset => {
 });
 
 
+resetViewBtn.addEventListener('click', () => {
+    sceneManager.resetCamera();
+});
+
+sceneManager.onCameraChange = (hasMoved) => {
+    resetViewBtn.style.display = hasMoved ? 'block' : 'none';
+};
+
+
 addBtn.addEventListener('click', () => {
     addPanel.classList.toggle('open');
 });
@@ -76,50 +104,9 @@ function addPropToStage(name)
     prop.placeAtCentre(STAGE_CONFIG.floorHeight);
     sceneManager.add(prop.mesh);
     props.push(prop);
-    updateLayersPanel();
+    layersPanel.update(props);
 }
 
-const layersList = document.getElementById('layers-list');
-
-function updateLayersPanel()
-{
-    layersList.innerHTML = '';
-
-    props.forEach(prop => {
-        const li = document.createElement('li');
-        li.textContent = prop.name;
-        li.dataset.id = prop.id;
-
-        li.addEventListener('click', () => {
-            if(selectedProp) 
-            {
-                selectedProp.deselect();
-                document.querySelectorAll('#layers-list li').forEach(el => el.classList.remove('selected'));
-            }
-
-            selectedProp = props.find(p => p.id === prop.id);
-            selectedProp.select();
-            li.classList.add('selected');
-        });
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent           = 'X';
-        deleteBtn.style.backgroundColor = 'transparent';
-        deleteBtn.style.color           = '#ff4444';
-        deleteBtn.style.border          = 'none';
-        deleteBtn.style.cursor          = 'pointer';
-        deleteBtn.style.fontWeight      = 'bold';
-
-
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeProp(prop.id);
-        });
-
-        li.appendChild(deleteBtn);
-        layersList.appendChild(li);
-    });
-}
 
 function removeProp(id)
 {
@@ -129,7 +116,7 @@ function removeProp(id)
 
     sceneManager.remove(props[index].mesh);
     props.splice(index, 1);
-    updateLayersPanel();
+    layersPanel.update(props);
 }
 
 sceneManager.start();
