@@ -8,6 +8,18 @@
     </head>
 
     <body>
+        <div id="top-bar">
+            <div class="brand-group">
+                <div class="brand">Stage Planner</div>
+                <div class="project-title" id="project-title">Untitled Project</div>
+            </div>
+            <div class="top-tag">MVP editor</div>
+            <div class="top-actions">
+                <button id="save-btn">Save</button>
+                <button id="load-btn">Load</button>
+            </div>
+        </div>
+
         <!-- This is where the 3D Scene will render -->
         <canvas id="theatre-canvas"></canvas>
 
@@ -29,6 +41,66 @@
             <button id="close-panel">X</button>
             <h3>Add To Stage</h3>
             <div id="add-panel-items"></div>
+        </div>
+
+        <input type="file" id="load-input" accept=".theatre.json,application/json" hidden />
+
+        <!-- Properties panel - right side of the screen -->
+        <div id="properties-panel">
+            <h3>Properties</h3>
+            <div id="properties-empty">Select a prop to edit its properties.</div>
+            <div id="properties-fields" class="hidden">
+                <div class="field">
+                    <label for="prop-name">Name</label>
+                    <input type="text" id="prop-name" />
+                </div>
+                <div class="field-group">
+                    <div class="field">
+                        <label for="prop-pos-x">Position X</label>
+                        <input type="number" step="0.1" id="prop-pos-x" />
+                    </div>
+                    <div class="field">
+                        <label for="prop-pos-y">Position Y</label>
+                        <input type="number" step="0.1" id="prop-pos-y" />
+                    </div>
+                    <div class="field">
+                        <label for="prop-pos-z">Position Z</label>
+                        <input type="number" step="0.1" id="prop-pos-z" />
+                    </div>
+                </div>
+                <div class="field-group">
+                    <div class="field">
+                        <label for="prop-size-w">Width</label>
+                        <input type="number" step="0.1" id="prop-size-w" />
+                    </div>
+                    <div class="field">
+                        <label for="prop-size-h">Height</label>
+                        <input type="number" step="0.1" id="prop-size-h" />
+                    </div>
+                    <div class="field">
+                        <label for="prop-size-d">Depth</label>
+                        <input type="number" step="0.1" id="prop-size-d" />
+                    </div>
+                </div>
+                <div class="field-group">
+                    <div class="field">
+                        <label for="prop-rot-x">Rotation X</label>
+                        <input type="number" step="1" id="prop-rot-x" />
+                    </div>
+                    <div class="field">
+                        <label for="prop-rot-y">Rotation Y</label>
+                        <input type="number" step="1" id="prop-rot-y" />
+                    </div>
+                    <div class="field">
+                        <label for="prop-rot-z">Rotation Z</label>
+                        <input type="number" step="1" id="prop-rot-z" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="prop-color">Color</label>
+                    <input type="color" id="prop-color" />
+                </div>
+            </div>
         </div>
 
 

@@ -26,7 +26,7 @@ export class SceneManager
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setClearColor(0x444444);
+        this.renderer.setClearColor(0xd8dde2);
         this.renderer.shadowMap.enabled = true;
     }
 

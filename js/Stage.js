@@ -21,9 +21,10 @@ export class Stage
 
         const material = new THREE.MeshStandardMaterial({ color: 0x333333});
         this.floor = new THREE.Mesh(geometry, material);
-        this.floor.position.y = STAGE_CONFIG.floorHeight;
+        this.floor.position.y = STAGE_CONFIG.floorHeight - 0.05;
         this.floor.receiveShadow = true;
         this.sceneManager.add(this.floor);
+        this._addFloorBorder();
     }
 
     _buildWalls()
@@ -41,7 +42,7 @@ export class Stage
         backWall.position.set(
             0,
             STAGE_CONFIG.floorHeight + STAGE_CONFIG.wallHeight / 2,
-            -STAGE_CONFIG.depth / 2 
+            -STAGE_CONFIG.depth / 2 - 0.05
         );
 
         this.sceneManager.add(backWall);
@@ -55,7 +56,7 @@ export class Stage
         
         const leftWall = new THREE.Mesh(sideWallGeo, sidewallMaterial);
         leftWall.position.set(
-            -STAGE_CONFIG.width / 2, 
+            -STAGE_CONFIG.width / 2 - 0.05,
             STAGE_CONFIG.floorHeight + STAGE_CONFIG.wallHeight / 2,
             0
         );
@@ -65,7 +66,7 @@ export class Stage
 
         const rightWall = new THREE.Mesh(sideWallGeo, sidewallMaterial);
         rightWall.position.set(
-            STAGE_CONFIG.width / 2,
+            STAGE_CONFIG.width / 2 + 0.05,
             STAGE_CONFIG.floorHeight + STAGE_CONFIG.wallHeight / 2,
             0
         );
@@ -83,5 +84,24 @@ export class Stage
         const edgeMaterial = new THREE.LineBasicMaterial({ color });
         const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
         mesh.add(edgeLines);
+    }
+
+    _addFloorBorder()
+    {
+        const halfWidth = STAGE_CONFIG.width / 2;
+        const halfDepth = STAGE_CONFIG.depth / 2;
+        const y = STAGE_CONFIG.floorHeight + 0.01;
+
+        const borderGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-halfWidth, y, -halfDepth),
+            new THREE.Vector3(halfWidth, y, -halfDepth),
+            new THREE.Vector3(halfWidth, y, halfDepth),
+            new THREE.Vector3(-halfWidth, y, halfDepth)
+        ]);
+
+        const borderMaterial = new THREE.LineBasicMaterial({ color: 0x7f8c8d, opacity: 0.75, transparent: true });
+        const border = new THREE.LineLoop(borderGeometry, borderMaterial);
+
+        this.sceneManager.add(border);
     }
 }

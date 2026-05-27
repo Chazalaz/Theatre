@@ -36,11 +36,11 @@ export class InputManager {
         this.raycaster.setFromCamera(this.mouse, this.sceneManager.camera);
 
         const meshes = this.props.map(p => p.mesh);
-        const intersects = this.raycaster.intersectObjects(meshes);
+        const intersects = this.raycaster.intersectObjects(meshes, true);
 
         if(intersects.length > 0) {
             const clickedMesh = intersects[0].object;
-            const clickedProp = this.props.find(p => p.mesh === clickedMesh);
+            const clickedProp = this.props.find(p => p.mesh === clickedMesh || p.mesh.getObjectById?.(clickedMesh.id) !== undefined);
 
             if(clickedProp) {
                 this.activeProp = clickedProp;
@@ -48,13 +48,15 @@ export class InputManager {
                 this.sceneManager.controls.enabled = false;
                 this.onPropSelected(clickedProp);
 
-                // Get the floor plane interstection point at mouse down
-                this.raycaster.ray.intersectPlane(this.floorPlane, this.targetPoint);
-
-                // Calculate drag offset
-                const clickPoint = intersects[0].point;
-                this.dragOffset.x = this.activeProp.mesh.position.x - clickPoint.x;
-                this.dragOffset.z = this.activeProp.mesh.position.z - clickPoint.z;
+                const floorIntersection = this.raycaster.ray.intersectPlane(this.floorPlane, this.targetPoint);
+                if(floorIntersection) {
+                    this.dragOffset.x = this.activeProp.mesh.position.x - this.targetPoint.x;
+                    this.dragOffset.z = this.activeProp.mesh.position.z - this.targetPoint.z;
+                } else {
+                    const clickPoint = intersects[0].point;
+                    this.dragOffset.x = this.activeProp.mesh.position.x - clickPoint.x;
+                    this.dragOffset.z = this.activeProp.mesh.position.z - clickPoint.z;
+                }
             }
         } else {
             this.onPropSelected(null);
@@ -69,8 +71,24 @@ export class InputManager {
 
         const intersection = this.raycaster.ray.intersectPlane(this.floorPlane, this.targetPoint); 
         if(!intersection) return;
-    
-        this.activeProp.move(this.targetPoint.x + this.dragOffset.x, this.targetPoint.z + this.dragOffset.z);
+
+        const desiredX = this.targetPoint.x + this.dragOffset.x;
+        const desiredZ = this.targetPoint.z + this.dragOffset.z;
+        const box = new THREE.Box3().setFromObject(this.activeProp.mesh);
+        const size = box.getSize(new THREE.Vector3());
+
+        const halfWidth = size.x / 2;
+        const halfDepth = size.z / 2;
+
+        const minX = -STAGE_CONFIG.width / 2 + halfWidth;
+        const maxX = STAGE_CONFIG.width / 2 - halfWidth;
+        const minZ = -STAGE_CONFIG.depth / 2 + halfDepth;
+        const maxZ = STAGE_CONFIG.depth / 2 - halfDepth;
+
+        const clampedX = Math.min(maxX, Math.max(minX, desiredX));
+        const clampedZ = Math.min(maxZ, Math.max(minZ, desiredZ));
+
+        this.activeProp.move(clampedX, clampedZ);
     }
 
     _onMouseUp() {
