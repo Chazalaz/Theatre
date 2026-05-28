@@ -18,6 +18,9 @@
                 <button id="save-btn">Save</button>
                 <button id="load-btn">Load</button>
                 <button id="clear-btn">Clear Stage</button>
+                <span class="top-actions-sep"></span>
+                <button id="topdown-btn">Top Down</button>
+                <button id="export-btn">Export PNG</button>
             </div>
         </div>
 
@@ -27,6 +30,18 @@
 
         <!-- Add Button - bottom centre -->
         <button id="add-btn">+ Add</button>
+
+        <!-- View Toolbar - bottom left: grid + snap controls -->
+        <div id="view-toolbar">
+            <button id="grid-btn" title="Toggle grid overlay">Grid</button>
+            <button id="snap-btn" title="Snap props to grid while dragging">Snap</button>
+            <select id="snap-select" title="Grid step size">
+                <option value="0.1">0.1 m</option>
+                <option value="0.25">0.25 m</option>
+                <option value="0.5" selected>0.5 m</option>
+                <option value="1">1.0 m</option>
+            </select>
+        </div>
 
         <!-- Reset View Button - bottom right -->
         <button id="reset-view-btn" title="Reset View">↺ Reset View</button>

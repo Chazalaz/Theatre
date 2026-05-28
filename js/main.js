@@ -18,18 +18,31 @@ const assetLibrary = new AssetLibrary();
 
 // ── App state ────────────────────────────────────────────────────────────────
 
-const props = [];
+const props      = [];
 let selectedProp = null;
 let projectName  = 'Untitled Project';
+
+// Grid / snap state
+let gridVisible  = false;
+let snapEnabled  = false;
+let snapStep     = 0.5;
+
+// Undo stack — stores snapshots of the props array
+const undoStack  = [];
 
 // ── DOM references ───────────────────────────────────────────────────────────
 
 const saveBtn        = document.getElementById('save-btn');
 const loadBtn        = document.getElementById('load-btn');
 const clearBtn       = document.getElementById('clear-btn');
+const topdownBtn     = document.getElementById('topdown-btn');
+const exportBtn      = document.getElementById('export-btn');
 const loadInput      = document.getElementById('load-input');
 const addBtn         = document.getElementById('add-btn');
 const resetViewBtn   = document.getElementById('reset-view-btn');
+const gridBtn        = document.getElementById('grid-btn');
+const snapBtn        = document.getElementById('snap-btn');
+const snapSelect     = document.getElementById('snap-select');
 const projectTitleEl = document.getElementById('project-title');
 
 // ── UI components ────────────────────────────────────────────────────────────
@@ -54,7 +67,12 @@ const addPanel = new AddPanel('add-panel', 'add-panel-items', (assetName) => {
 });
 addPanel.populate(assetLibrary.getCatalogue());
 
-new InputManager(sceneManager, props, (clickedProp) => selectProp(clickedProp));
+const inputManager = new InputManager(sceneManager, props, (clickedProp) => selectProp(clickedProp));
+inputManager.onDragStart = () => snapshot();
+
+// ── Initialise grid ──────────────────────────────────────────────────────────
+
+sceneManager.setGrid(snapStep, STAGE_CONFIG.floorHeight, gridVisible);
 
 // ── Event bindings ───────────────────────────────────────────────────────────
 
@@ -75,7 +93,36 @@ loadInput.addEventListener('change', async (e) => {
 clearBtn.addEventListener('click', async () => {
     if (props.length === 0) return;
     const confirmed = await Modal.confirm('Clear the stage? This cannot be undone.');
-    if (confirmed) clearStage();
+    if (confirmed) { snapshot(); clearStage(); }
+});
+
+topdownBtn.addEventListener('click', () => {
+    const isTopDown = sceneManager.toggleTopDown();
+    topdownBtn.classList.toggle('active', isTopDown);
+    topdownBtn.textContent = isTopDown ? '3D View' : 'Top Down';
+    if (isTopDown) resetViewBtn.style.display = 'none';
+});
+
+exportBtn.addEventListener('click', () => {
+    sceneManager.exportFloorPlan(projectName || 'floor-plan');
+});
+
+gridBtn.addEventListener('click', () => {
+    gridVisible = !gridVisible;
+    gridBtn.classList.toggle('active', gridVisible);
+    sceneManager.setGridVisible(gridVisible);
+});
+
+snapBtn.addEventListener('click', () => {
+    snapEnabled = !snapEnabled;
+    snapBtn.classList.toggle('active', snapEnabled);
+    inputManager.setSnap(snapEnabled, snapStep);
+});
+
+snapSelect.addEventListener('change', () => {
+    snapStep = parseFloat(snapSelect.value);
+    sceneManager.setGrid(snapStep, STAGE_CONFIG.floorHeight, gridVisible);
+    inputManager.setSnap(snapEnabled, snapStep);
 });
 
 sceneManager.onCameraChange = (hasMoved) => {
@@ -87,6 +134,79 @@ if (projectTitleEl) {
         const name = await Modal.prompt('Enter a project name', projectName);
         if (name !== null) setProjectName(name);
     });
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+
+document.addEventListener('keydown', (e) => {
+    const inInput = e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA';
+
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !inInput) {
+        if (selectedProp) { snapshot(); removeProp(selectedProp.id); }
+        return;
+    }
+
+    if (e.key === 'Escape' && !inInput) {
+        selectProp(null);
+        return;
+    }
+
+    if (e.key === 'd' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        if (selectedProp) { snapshot(); duplicateProp(selectedProp); }
+        return;
+    }
+
+    if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+    }
+
+    if (!inInput && selectedProp) {
+        const step = snapEnabled ? snapStep : 0.1;
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); inputManager.nudge(selectedProp, -step, 0); propertiesPanel.setSelectedProp(selectedProp); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); inputManager.nudge(selectedProp,  step, 0); propertiesPanel.setSelectedProp(selectedProp); }
+        if (e.key === 'ArrowUp')    { e.preventDefault(); inputManager.nudge(selectedProp, 0, -step); propertiesPanel.setSelectedProp(selectedProp); }
+        if (e.key === 'ArrowDown')  { e.preventDefault(); inputManager.nudge(selectedProp, 0,  step); propertiesPanel.setSelectedProp(selectedProp); }
+    }
+});
+
+// ── Undo ─────────────────────────────────────────────────────────────────────
+
+function snapshot() {
+    undoStack.push(props.map(p => ({
+        name:     p.name,
+        color:    p.getColorHex(),
+        position: { x: p.mesh.position.x, y: p.mesh.position.y, z: p.mesh.position.z },
+        rotation: { x: p.mesh.rotation.x, y: p.mesh.rotation.y, z: p.mesh.rotation.z },
+        scale:    { x: p.mesh.scale.x,    y: p.mesh.scale.y,    z: p.mesh.scale.z    },
+    })));
+    if (undoStack.length > 20) undoStack.shift();
+}
+
+function undo() {
+    if (!undoStack.length) return;
+    const state = undoStack.pop();
+
+    props.forEach(p => sceneManager.remove(p.mesh));
+    props.length = 0;
+    selectedProp = null;
+    propertiesPanel.setSelectedProp(null);
+
+    state.forEach(item => {
+        const prop = assetLibrary.createProp(item.name);
+        if (!prop) return;
+        prop.placeAtCentre(STAGE_CONFIG.floorHeight);
+        prop.mesh.position.set(item.position.x, item.position.y, item.position.z);
+        prop.mesh.rotation.set(item.rotation.x, item.rotation.y, item.rotation.z);
+        prop.mesh.scale.set(item.scale.x, item.scale.y, item.scale.z);
+        prop.setColor(item.color);
+        sceneManager.add(prop.mesh);
+        props.push(prop);
+    });
+
+    layersPanel.update(props);
 }
 
 // ── Prop management ──────────────────────────────────────────────────────────
@@ -107,6 +227,7 @@ function selectProp(prop) {
 }
 
 function addPropToStage(name) {
+    snapshot();
     const prop = assetLibrary.createProp(name);
     if (!prop) return;
 
@@ -217,6 +338,7 @@ async function loadStageFromFile(file) {
         if (!data || !Array.isArray(data.props)) throw new Error('Invalid project file.');
 
         clearStage();
+        undoStack.length = 0;
         setProjectName(data.projectName || file.name.replace(/\.[^/.]+$/, '') || 'Untitled Project');
 
         if (data.stageConfig) {
