@@ -17,17 +17,13 @@
             <div class="top-actions">
                 <button id="save-btn">Save</button>
                 <button id="load-btn">Load</button>
+                <button id="clear-btn">Clear Stage</button>
             </div>
         </div>
 
         <!-- This is where the 3D Scene will render -->
         <canvas id="theatre-canvas"></canvas>
 
-        <!-- Layers panel - left side of the screen -->
-        <div id="layers-panel">
-            <h3>Layers</h3>
-            <ul id="layers-list"></ul>
-        </div>
 
         <!-- Add Button - bottom centre -->
         <button id="add-btn">+ Add</button>
@@ -45,60 +41,153 @@
 
         <input type="file" id="load-input" accept=".theatre.json,application/json" hidden />
 
-        <!-- Properties panel - right side of the screen -->
-        <div id="properties-panel">
-            <h3>Properties</h3>
-            <div id="properties-empty">Select a prop to edit its properties.</div>
-            <div id="properties-fields" class="hidden">
-                <div class="field">
-                    <label for="prop-name">Name</label>
-                    <input type="text" id="prop-name" />
+        <!-- Modal dialog -->
+        <div id="modal-overlay" class="hidden">
+            <div class="modal">
+                <p id="modal-message"></p>
+                <input type="text" id="modal-input" class="hidden" autocomplete="off" />
+                <div class="modal-actions">
+                    <button id="modal-cancel"  class="modal-btn modal-btn-secondary">Cancel</button>
+                    <button id="modal-confirm" class="modal-btn modal-btn-primary">OK</button>
                 </div>
-                <div class="field-group">
-                    <div class="field">
-                        <label for="prop-pos-x">Position X</label>
-                        <input type="number" step="0.1" id="prop-pos-x" />
-                    </div>
-                    <div class="field">
-                        <label for="prop-pos-y">Position Y</label>
-                        <input type="number" step="0.1" id="prop-pos-y" />
-                    </div>
-                    <div class="field">
-                        <label for="prop-pos-z">Position Z</label>
-                        <input type="number" step="0.1" id="prop-pos-z" />
+            </div>
+        </div>
+
+        <!-- Right Side Panel - Properties and Layers -->
+        <div id="right-panel">
+            <button id="panel-tab" title="Toggle panel"><span class="tab-icon">‹</span></button>
+
+            <!-- Properties Section -->
+            <div class="panel-section" id="properties-section">
+                <div class="panel-header">
+                    <span class="panel-title">Properties</span>
+                    <button class="panel-toggle" data-section="properties">›</button>
+                </div>
+                <div class="panel-content">
+                    <div id="properties-empty">Select a prop to edit its properties.</div>
+                    <div id="properties-fields" class="hidden">
+                        <div class="field">
+                            <label for="prop-name">Name</label>
+                            <input type="text" id="prop-name" />
+                        </div>
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="prop-pos-x">Position X</label>
+                                <input type="number" step="0.1" id="prop-pos-x" />
+                            </div>
+                            <div class="field">
+                                <label for="prop-pos-y">Position Y</label>
+                                <input type="number" step="0.1" id="prop-pos-y" />
+                            </div>
+                            <div class="field">
+                                <label for="prop-pos-z">Position Z</label>
+                                <input type="number" step="0.1" id="prop-pos-z" />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="prop-size-w">Width</label>
+                                <input type="number" step="0.1" id="prop-size-w" />
+                            </div>
+                            <div class="field">
+                                <label for="prop-size-h">Height</label>
+                                <input type="number" step="0.1" id="prop-size-h" />
+                            </div>
+                            <div class="field">
+                                <label for="prop-size-d">Depth</label>
+                                <input type="number" step="0.1" id="prop-size-d" />
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="prop-rot-x">Rotation X</label>
+                                <input type="number" step="1" id="prop-rot-x" />
+                            </div>
+                            <div class="field">
+                                <label for="prop-rot-y">Rotation Y</label>
+                                <input type="number" step="1" id="prop-rot-y" />
+                            </div>
+                            <div class="field">
+                                <label for="prop-rot-z">Rotation Z</label>
+                                <input type="number" step="1" id="prop-rot-z" />
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label for="prop-color">Color</label>
+                            <input type="color" id="prop-color" />
+                        </div>
                     </div>
                 </div>
-                <div class="field-group">
-                    <div class="field">
-                        <label for="prop-size-w">Width</label>
-                        <input type="number" step="0.1" id="prop-size-w" />
-                    </div>
-                    <div class="field">
-                        <label for="prop-size-h">Height</label>
-                        <input type="number" step="0.1" id="prop-size-h" />
-                    </div>
-                    <div class="field">
-                        <label for="prop-size-d">Depth</label>
-                        <input type="number" step="0.1" id="prop-size-d" />
-                    </div>
+            </div>
+
+            <!-- Layers Section -->
+            <div class="panel-section" id="layers-section">
+                <div class="panel-header">
+                    <span class="panel-title">Layers</span>
+                    <button class="panel-toggle" data-section="layers">›</button>
                 </div>
-                <div class="field-group">
-                    <div class="field">
-                        <label for="prop-rot-x">Rotation X</label>
-                        <input type="number" step="1" id="prop-rot-x" />
-                    </div>
-                    <div class="field">
-                        <label for="prop-rot-y">Rotation Y</label>
-                        <input type="number" step="1" id="prop-rot-y" />
-                    </div>
-                    <div class="field">
-                        <label for="prop-rot-z">Rotation Z</label>
-                        <input type="number" step="1" id="prop-rot-z" />
-                    </div>
+                <div class="panel-content">
+                    <ul id="layers-list"></ul>
                 </div>
-                <div class="field">
-                    <label for="prop-color">Color</label>
-                    <input type="color" id="prop-color" />
+            </div>
+
+            <!-- Stage Section (starts collapsed) -->
+            <div class="panel-section collapsed" id="stage-section">
+                <div class="panel-header">
+                    <span class="panel-title">Stage</span>
+                    <button class="panel-toggle collapsed" data-section="stage">›</button>
+                </div>
+                <div class="panel-content collapsed">
+
+                    <!-- Floor -->
+                    <div class="stage-group">
+                        <div class="stage-group-title">Floor</div>
+                        <div class="stage-row">
+                            <span class="stage-label">Colour</span>
+                            <input type="color" id="floor-color" value="#333333" />
+                        </div>
+                    </div>
+
+                    <!-- Left Wall -->
+                    <div class="stage-group">
+                        <div class="stage-group-header">
+                            <div class="stage-group-title">Left Wall</div>
+                            <label class="toggle-switch" title="Show / hide wall">
+                                <input type="checkbox" id="left-wall-visible" checked />
+                                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="stage-row">
+                            <span class="stage-label">Colour</span>
+                            <input type="color" id="left-wall-color" value="#3a3a3a" />
+                        </div>
+                        <div class="doorways-list" id="left-wall-doorways"></div>
+                        <button class="add-doorway-btn" id="add-left-doorway">+ Doorway</button>
+                    </div>
+
+                    <!-- Right Wall -->
+                    <div class="stage-group">
+                        <div class="stage-group-header">
+                            <div class="stage-group-title">Right Wall</div>
+                            <label class="toggle-switch" title="Show / hide wall">
+                                <input type="checkbox" id="right-wall-visible" checked />
+                                <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                            </label>
+                        </div>
+                        <div class="stage-row">
+                            <span class="stage-label">Colour</span>
+                            <input type="color" id="right-wall-color" value="#3a3a3a" />
+                        </div>
+                        <div class="doorways-list" id="right-wall-doorways"></div>
+                        <button class="add-doorway-btn" id="add-right-doorway">+ Doorway</button>
+                    </div>
+
+                    <!-- Back Wall (always white) -->
+                    <div class="stage-group stage-group-muted">
+                        <div class="stage-group-title">Back Wall</div>
+                        <div class="stage-note">Always white — not configurable</div>
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -75,7 +75,8 @@ export class Prop
     setName(name)
     {
         if(typeof name !== 'string' || name.trim() === '') return;
-        this.name = name.trim();
+        const trimmed = name.trim();
+        this.name = trimmed.length > 50 ? trimmed.substring(0, 50) : trimmed;
     }
 
     setPosition(x, y, z)

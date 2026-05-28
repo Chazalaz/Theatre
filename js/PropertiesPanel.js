@@ -2,25 +2,25 @@ import * as THREE from 'three';
 
 export class PropertiesPanel
 {
-    constructor(containerId, onPropertyUpdated)
+    constructor(onPropertyUpdated)
     {
-        this.container = document.getElementById(containerId);
         this.onPropertyUpdated = onPropertyUpdated;
         this.selectedProp = null;
 
-        this.nameInput = this.container.querySelector('#prop-name');
-        this.positionXInput = this.container.querySelector('#prop-pos-x');
-        this.positionYInput = this.container.querySelector('#prop-pos-y');
-        this.positionZInput = this.container.querySelector('#prop-pos-z');
-        this.sizeWInput = this.container.querySelector('#prop-size-w');
-        this.sizeHInput = this.container.querySelector('#prop-size-h');
-        this.sizeDInput = this.container.querySelector('#prop-size-d');
-        this.rotationXInput = this.container.querySelector('#prop-rot-x');
-        this.rotationYInput = this.container.querySelector('#prop-rot-y');
-        this.rotationZInput = this.container.querySelector('#prop-rot-z');
-        this.colorInput = this.container.querySelector('#prop-color');
-        this.fieldsContainer = this.container.querySelector('#properties-fields');
-        this.emptyMessage = this.container.querySelector('#properties-empty');
+        this.nameInput = document.querySelector('#prop-name');
+        this.nameInput.maxLength = 50;
+        this.positionXInput = document.querySelector('#prop-pos-x');
+        this.positionYInput = document.querySelector('#prop-pos-y');
+        this.positionZInput = document.querySelector('#prop-pos-z');
+        this.sizeWInput = document.querySelector('#prop-size-w');
+        this.sizeHInput = document.querySelector('#prop-size-h');
+        this.sizeDInput = document.querySelector('#prop-size-d');
+        this.rotationXInput = document.querySelector('#prop-rot-x');
+        this.rotationYInput = document.querySelector('#prop-rot-y');
+        this.rotationZInput = document.querySelector('#prop-rot-z');
+        this.colorInput = document.querySelector('#prop-color');
+        this.fieldsContainer = document.querySelector('#properties-fields');
+        this.emptyMessage = document.querySelector('#properties-empty');
 
         this._bindEvents();
         this.setSelectedProp(null);
