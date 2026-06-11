@@ -206,7 +206,6 @@ export class Stage {
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(xPos, floorHeight + yFrom + height / 2, zCenter);
         mesh.receiveShadow = true;
-        this._addEdges(mesh);
         return mesh;
     }
 
@@ -219,10 +218,26 @@ export class Stage {
     }
 
     static _defaultConfig() {
+        // z positions derived from Progress Theatre dimensions (PDF).
+        // z=0 is stage centre; negative = upstage, positive = downstage.
+        // Left wall = Stage Right; Right wall = Stage Left.
         return {
             floorColor: '#333333',
-            leftWall:  { color: '#3a3a3a', visible: true, doorways: [] },
-            rightWall: { color: '#3a3a3a', visible: true, doorways: [] },
+            leftWall: {
+                color: '#3a3a3a', visible: true,
+                doorways: [
+                    { id: crypto.randomUUID(), zCenter: -1.945, width: 1.83,  height: 2.86  }, // USR gap
+                    { id: crypto.randomUUID(), zCenter:  1.188, width: 1.255, height: 1.92  }, // DSR gap
+                ],
+            },
+            rightWall: {
+                color: '#3a3a3a', visible: true,
+                doorways: [
+                    { id: crypto.randomUUID(), zCenter: -2.55,  width: 0.82,  height: 2.50  }, // USL gap
+                    { id: crypto.randomUUID(), zCenter: -0.82,  width: 1.62,  height: 2.45  }, // SM gap
+                    { id: crypto.randomUUID(), zCenter:  1.128, width: 0.735, height: 1.99  }, // DSL gap
+                ],
+            },
         };
     }
 }
